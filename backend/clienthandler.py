@@ -6,7 +6,7 @@ ClientHandler
 '''
 class Client(object):
     def __init__(self,pc):
-        self.pc = pc;
+        self.pc = pc
         self.detection_queues = []
 
     def add_new_detections(self,bbs):

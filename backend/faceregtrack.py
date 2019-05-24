@@ -21,8 +21,6 @@ def start_worker(loop):
 
 
 
-
-
 class FacialRecognitionTrack(VideoStreamTrack):
 
     def __init__(self, face_detector, client, track=None):
