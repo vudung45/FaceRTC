@@ -13,6 +13,10 @@ let pc = new RTCPeerConnection({
 pc.addTransceiver('video');
 pc.addTransceiver('audio');
 
+let dc = createDataChannel(); //datachannel
+
+let dcReady = false;
+
 const video = document.querySelector('#user-webcam');
 pc.addEventListener('track', function(evt) {
 	console.log("Update Stream");
@@ -44,41 +48,62 @@ function setupP2PWithServer(localOffer)
 	}
 	)
 }
+
+function createDataChannel()
+{
+
+	try
+	{
+		let _dc = pc.createDataChannel("communication", {}); //this is a sync function
+		_dc.onclose = () => console.log("Data channel `communication` closed");
+	    _dc.onmessage = (event) => console.log(evt.data);
+	    _dc.onopen = function() {
+            _dc.send("connected")
+            dcReady = true;
+            console.log("Data channel opened")
+        };
+	    return _dc;
+	} catch(e)
+	{
+		console.log(e);
+		return null;
+	}
+}
 function setupPC(media_player)
 {
 	console.log("Setting up client Peer connection");
-	pc.createOffer().then((offer) => {
-		return pc.setLocalDescription(offer);} //set local description
-	)
-	.then( () => {		
-		return new Promise(function(resolve) {
-            if (pc.iceGatheringState == 'complete') {
-                resolve();
-            } else {
-                function checkState() {
-                    if (pc.iceGatheringState == 'complete') {
-                    	console.log("Local SDP setting up completed")
-                        pc.removeEventListener('icegatheringstatechange', checkState);
-                        resolve();
-                    }
-                }
-                pc.addEventListener('icegatheringstatechange', checkState);
-            }
-        }); }
-	)
-	.then( ()  => //now local SDP is successfully created
-	{
-		let localOffer = pc.localDescription;
-		console.log(localOffer);
-		return setupP2PWithServer(localOffer);
-	}
-	).then((json) => {
-		console.log("Server SDP: ")
-		console.log(json);
-		return pc.setRemoteDescription(json);
-	}
-
-	)
+	return new Promise(resolve => {
+			pc.createOffer().then((offer) => {
+				return pc.setLocalDescription(offer);} //set local description
+			)
+			.then( () => {		
+				return new Promise(function(resolve) {
+		            if (pc.iceGatheringState == 'complete') {
+		                resolve();
+		            } else {
+		                function checkState() {
+		                    if (pc.iceGatheringState == 'complete') {
+		                    	console.log("Local SDP setting up completed")
+		                        pc.removeEventListener('icegatheringstatechange', checkState);
+		                        resolve();
+		                    }
+		                }
+		                pc.addEventListener('icegatheringstatechange', checkState);
+		            }
+		        }); }
+			)
+			.then( ()  => //now local SDP is successfully created
+			{
+				let localOffer = pc.localDescription;
+				console.log(localOffer);
+				return setupP2PWithServer(localOffer);
+			}
+			).then((json) => {
+				console.log("Server SDP: ")
+				console.log(json);
+				resolve(pc.setRemoteDescription(json));
+			})
+	});
 
 }
 

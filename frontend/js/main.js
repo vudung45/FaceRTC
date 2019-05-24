@@ -13,6 +13,7 @@ const constraints = window.constraints = {
 };
 
 
+
 async function init(e) {
 
 
@@ -22,7 +23,7 @@ async function init(e) {
         stream.getTracks().forEach((track) => {
           pc.addTrack(track,stream)
         })
-        return setupPC();
+        setupPC();
       }
     ).catch(e => console.log(e))
     

@@ -18,6 +18,20 @@ from clienthandler import Client
 ROOT = os.path.dirname(__file__)
 
 
+_id = 0
+
+def create_new_client(pc):
+    global clients, _id
+    clients[_id] = Client(pc, _id)
+    _id+=1;
+    return _id - 1;
+
+async def remove_client(_id):
+    if _id in clients:
+        await clients[_id].close()
+        del clients[_id]
+
+
 async def index(request):
     content = open(os.path.join(ROOT, "../frontend/client.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
@@ -46,17 +60,21 @@ async def offer(request):
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
     pc = RTCPeerConnection()
-    new_client = Client(pc)
-    clients.add(Client(pc))
+    client_id = create_new_client(pc)
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
         print("ICE connection state is %s" % pc.iceConnectionState)
         if pc.iceConnectionState == "failed":
-            await pc.close()
-            clients.discard(new_client)
+            await remove_client(client_id) #this already handles pc closing
 
-    faceregtrack = FacialRecognitionTrack(face_detect, new_client);
+    faceregtrack = FacialRecognitionTrack(face_detect, clients[client_id]);
+
+    @pc.on("datachannel")
+    def on_datachannel(channel):
+        @channel.on("message")
+        def on_message(message):
+            print(message)
 
     @pc.on("track")
     def on_track(track):
@@ -86,12 +104,12 @@ async def offer(request):
 
 
 
-clients = set()
+clients = dict()
 
 
 
 async def on_shutdown(app):
-    coros = [client.pc.close() for client in clients]
+    coros = [clients[_id].pc.close() for _id in clients]
     await asyncio.gather(*coros)
     clients.clear()
 
