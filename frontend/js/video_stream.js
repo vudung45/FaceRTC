@@ -24,7 +24,7 @@ pc.addEventListener('track', function(evt) {
 function setupP2PWithServer(localOffer)
 {
 	return new Promise( resolve => {
-		fetch("http://127.0.0.1:8080/offer",{
+		fetch("/offer",{
 		body: JSON.stringify({
 			sdp: localOffer.sdp,
 			type: localOffer.type

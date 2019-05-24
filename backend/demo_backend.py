@@ -22,6 +22,10 @@ async def index(request):
     content = open(os.path.join(ROOT, "../frontend/client.html"), "r").read()
     return web.Response(content_type="text/html", text=content)
 
+async def sample_html(request):
+    content = open(os.path.join(ROOT, "../frontend/sample.html"), "r").read()
+    return web.Response(content_type="text/html", text=content)
+
 
 async def main_js(request):
     content = open(os.path.join(ROOT, "../frontend/js/main.js"), "r").read()
@@ -29,6 +33,10 @@ async def main_js(request):
 
 async def video_stream_js(request):
     content = open(os.path.join(ROOT, "../frontend/js/video_stream.js"), "r").read()
+    return web.Response(content_type="application/javascript", text=content)
+
+async def sample_js(request):
+    content = open(os.path.join(ROOT, "../frontend/js/sample.js"), "r").read()
     return web.Response(content_type="application/javascript", text=content)
 
 
@@ -110,9 +118,11 @@ if __name__ == "__main__":
     app = web.Application()
     app.on_shutdown.append(on_shutdown)
     app.router.add_get("/", index)
+    app.router.add_get("/sample.html", sample_html)
     app.router.add_get("/js/main.js", main_js)
     app.router.add_get("/js/video_stream.js", video_stream_js)
+    app.router.add_get("/js/sample.js", sample_js)
     app.router.add_post("/offer", offer)
     MTCNNGraph = FaceRecGraph();
     face_detect = MTCNNDetect(MTCNNGraph, scale_factor=2); #scale_factor, rescales image for faster detection
-    web.run_app(app, port=args.port, ssl_context=ssl_context, host="127.0.0.1")
+    web.run_app(app, port=args.port, ssl_context=ssl_context)

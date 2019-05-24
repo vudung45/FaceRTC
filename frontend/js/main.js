@@ -15,6 +15,7 @@ const constraints = window.constraints = {
 
 async function init(e) {
 
+
     navigator.mediaDevices.getUserMedia(constraints).then(
       (stream) =>
       {
@@ -23,7 +24,7 @@ async function init(e) {
         })
         return setupPC();
       }
-    ).catch((e) => console.log(e))
+    ).catch(e => console.log(e))
     
     e.target.disabled = true;
 }
