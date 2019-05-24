@@ -12,7 +12,9 @@ from aiortc import RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaPlayer
 
 from faceregtrack import FacialRecognitionTrack
-
+from facerec_core.mtcnn_detect import MTCNNDetect
+from facerec_core.tf_graph import FaceRecGraph
+from clienthandler import Client
 ROOT = os.path.dirname(__file__)
 
 
@@ -36,22 +38,24 @@ async def offer(request):
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
     pc = RTCPeerConnection()
-    pcs.add(pc)
+    new_client = Client(pc)
+    clients.add(Client(pc))
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
         print("ICE connection state is %s" % pc.iceConnectionState)
         if pc.iceConnectionState == "failed":
             await pc.close()
-            pcs.discard(pc)
+            clients.discard(new_client)
 
-    faceregtrack = FacialRecognitionTrack();
+    faceregtrack = FacialRecognitionTrack(face_detect, new_client);
+
     @pc.on("track")
     def on_track(track):
         print("Track %s received" % track.kind)
         if track.kind == "video":
             faceregtrack.update(track);
-
+            
 
 
     await pc.setRemoteDescription(offer)
@@ -72,14 +76,16 @@ async def offer(request):
     )
 
 
-pcs = set()
+
+
+clients = set()
 
 
 
 async def on_shutdown(app):
-    coros = [pc.close() for pc in pcs]
+    coros = [client.pc.close() for client in clients]
     await asyncio.gather(*coros)
-    pcs.clear()
+    clients.clear()
 
 
 if __name__ == "__main__":
@@ -107,4 +113,6 @@ if __name__ == "__main__":
     app.router.add_get("/js/main.js", main_js)
     app.router.add_get("/js/video_stream.js", video_stream_js)
     app.router.add_post("/offer", offer)
+    MTCNNGraph = FaceRecGraph();
+    face_detect = MTCNNDetect(MTCNNGraph, scale_factor=2); #scale_factor, rescales image for faster detection
     web.run_app(app, port=args.port, ssl_context=ssl_context, host="127.0.0.1")
