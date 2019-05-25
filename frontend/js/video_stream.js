@@ -18,6 +18,10 @@ let dc = createDataChannel(); //datachannel
 let dcReady = false;
 
 const video = document.querySelector('#user-webcam');
+const switchButton = document.getElementById('modeSwitch');
+const subjectName = document.querySelector('#subject-name');
+
+let registering = false;
 pc.addEventListener('track', function(evt) {
 	console.log("Update Stream");
     if (evt.track.kind == 'video') {
@@ -42,11 +46,26 @@ function setupP2PWithServer(localOffer)
 		.then(res => res.json())
 		.then((json) =>
 		{
-			console.log(json)
+			console.log(json);
 			resolve(json);
 		})
 	}
 	)
+}
+
+function switchMode(e)
+{
+	if(!registering){
+		dc.send("$register$"+subjectName.value);
+		registering = !registering;
+		switchButton.value = "Toggle recognition mode";
+	}
+	else{
+		dc.send("$recognize$");
+		registering = !registering;
+		switchButton.value = "Toggle register mode";
+		
+	}
 }
 
 function createDataChannel()
@@ -56,10 +75,11 @@ function createDataChannel()
 	{
 		let _dc = pc.createDataChannel("communication", {}); //this is a sync function
 		_dc.onclose = () => console.log("Data channel `communication` closed");
-	    _dc.onmessage = (event) => console.log(evt.data);
+	    _dc.onmessage = (event) => console.log(event.data);
 	    _dc.onopen = function() {
             _dc.send("connected")
             dcReady = true;
+            switchButton.addEventListener('click', e => switchMode(e));
             console.log("Data channel opened")
         };
 	    return _dc;
