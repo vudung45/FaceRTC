@@ -15,6 +15,7 @@ from faceregtrack import FacialRecognitionTrack
 from facerec_core.mtcnn_detect import MTCNNDetect
 from facerec_core.tf_graph import FaceRecGraph
 from clienthandler import Client
+from facerec_core.face_feature import FaceFeature
 ROOT = os.path.dirname(__file__)
 
 
@@ -74,7 +75,15 @@ async def offer(request):
     def on_datachannel(channel):
         @channel.on("message")
         def on_message(message):
-            print(message)
+            if "$register$" in message: #this is some poorman message handling :)
+                new_subject = message.split("$register$")[1]
+                print("Registering for subject: "+new_subject)
+                clients[client_id].toggle_register_mode()
+            elif "$recognize$" in message:
+                print("Turned on recognition mode")
+                clients[client_id].toggle_recog_mode()
+
+
 
     @pc.on("track")
     def on_track(track):
@@ -105,6 +114,9 @@ async def offer(request):
 
 
 clients = dict()
+
+dataset = dict()
+
 
 
 
@@ -142,5 +154,7 @@ if __name__ == "__main__":
     app.router.add_get("/js/sample.js", sample_js)
     app.router.add_post("/offer", offer)
     MTCNNGraph = FaceRecGraph();
+    FaceGraph = FaceRecGraph();
     face_detect = MTCNNDetect(MTCNNGraph, scale_factor=2); #scale_factor, rescales image for faster detection
+    face_recog = FaceFeature(FaceGraph)
     web.run_app(app, port=args.port, ssl_context=ssl_context)
