@@ -11,7 +11,7 @@ import numpy as np
 import threading
 import cv2
 from PIL import Image
-
+from facerec_core.face_align import align
 
 def start_worker(loop):
     """Switch to new event loop and run forever"""
@@ -30,7 +30,7 @@ class FacialRecognitionTrack(VideoStreamTrack):
         self.frames = []
         self.face_detector = face_detector
         self.client = client
-        self.skip_frame = 5
+        self.skip_frame = 10
         self.count = 0
         current_loop = asyncio.get_event_loop();
         current_loop.create_task(self.poll_frames());
@@ -59,7 +59,8 @@ class FacialRecognitionTrack(VideoStreamTrack):
                         rects, points = self.face_detector.detect_face(image)
                         for (i,rect) in enumerate(rects):
                             self.client.add_new_detections(rects);
-                            self.client.add_new_face(image[min(0,rect[1]):max(len(image),rect[3]),min(0,rect[0]):max(len(image),rect[2])], rect)
+                            cropped, _ = align(160,image,points[:,i])
+                            self.client.add_new_face(cropped, rect)
                     except Exception as e:
                         print(e)
                     self.client.generate_trackers_face_features()

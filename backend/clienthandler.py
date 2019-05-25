@@ -112,8 +112,7 @@ class Client(object):
             tracker.update_label() #determine the updated label based on the new recog result
 
     def generate_trackers_face_features(self):
-        l_track_ids = list(self.trackers.keys())
-        for tracker in (self.trackers[_id] for _id in l_track_ids):
+        for tracker in self.trackers.values():
             if len(tracker.faces) > 0: #generate in a batch of 5
                 tracker.merge_new_embeddings(self.face_recog.get_features(tracker.faces))
                 tracker.purge_faces()
