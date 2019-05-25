@@ -30,6 +30,8 @@ class FacialRecognitionTrack(VideoStreamTrack):
         self.frames = []
         self.face_detector = face_detector
         self.client = client
+        self.skip_frame = 5
+        self.count = 0
         current_loop = asyncio.get_event_loop();
         current_loop.create_task(self.poll_frames());
         
@@ -47,20 +49,24 @@ class FacialRecognitionTrack(VideoStreamTrack):
         while True:
             if(self.stream):
                 v_frame = await self.stream.recv();
-                self.client.purge_trackers(); #because we dont have a tracking algo so do this for now
                 image = v_frame.to_ndarray(format="bgr24");
-                try:
-                #parrellel this shit
-                    rects, points = self.face_detector.detect_face(image)
-                    for (i,rect) in enumerate(rects):
-                        self.client.add_new_detections(rects);
-                        self.client.add_new_face(image[min(0,rect[1]):max(len(image),rect[3]),min(0,rect[0]):max(len(image),rect[2])], rect)
-                except Exception as e:
-                    print(e)
+
+                self.count += 1
+                if self.count % self.skip_frame == 0:
+                    self.client.purge_trackers(); #because we dont have a tracking algo so do this for now
+                    try:
+                    #parrellel this shit
+                        rects, points = self.face_detector.detect_face(image)
+                        for (i,rect) in enumerate(rects):
+                            self.client.add_new_detections(rects);
+                            self.client.add_new_face(image[min(0,rect[1]):max(len(image),rect[3]),min(0,rect[0]):max(len(image),rect[2])], rect)
+                    except Exception as e:
+                        print(e)
+                    self.client.generate_trackers_face_features()
                 for tracker in self.client.trackers.values():
                     if tracker.active:
                         cv2.rectangle(image,(tracker.bb[0],tracker.bb[1]),(tracker.bb[2],tracker.bb[3]),(255,0,0))
-                self.client.generate_trackers_face_features()
+                        cv2.putText(image,tracker.label,(tracker.bb[0],tracker.bb[1]),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,255),1,cv2.LINE_AA)
                 new_frame = av.VideoFrame.from_ndarray(image, format="bgr24")
                 new_frame.pts = v_frame.pts
                 new_frame.time_base = v_frame.time_base
