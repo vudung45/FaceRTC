@@ -14,7 +14,7 @@ from aiortc.contrib.media import MediaPlayer
 from faceregtrack import FacialRecognitionTrack
 from facerec_core.mtcnn_detect import MTCNNDetect
 from facerec_core.tf_graph import FaceRecGraph
-from clienthandler import Client
+from clienthandler import Client, ClientManager
 from facerec_core.face_feature import FaceFeature
 ROOT = os.path.dirname(__file__)
 
@@ -61,27 +61,28 @@ async def offer(request):
     offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
     pc = RTCPeerConnection()
-    client_id = create_new_client(pc)
+    client_id = client_manager.create_new_client(pc)
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
         print("ICE connection state is %s" % pc.iceConnectionState)
         if pc.iceConnectionState == "failed":
-            await remove_client(client_id) #this already handles pc closing
+            await client_manager.remove_client(client_id) #this already handles pc closing
 
-    faceregtrack = FacialRecognitionTrack(face_detect, clients[client_id]);
+    faceregtrack = FacialRecognitionTrack(face_detect, client_manager.get_client(client_id));
 
     @pc.on("datachannel")
     def on_datachannel(channel):
         @channel.on("message")
         def on_message(message):
+            client = client_manager.get_client(client_id)
             if "$register$" in message: #this is some poorman message handling :)
                 new_subject = message.split("$register$")[1]
                 print("Registering for subject: "+new_subject)
-                clients[client_id].toggle_register_mode()
+                client.toggle_register_mode()
             elif "$recognize$" in message:
                 print("Turned on recognition mode")
-                clients[client_id].toggle_recog_mode()
+                client.toggle_recog_mode()
 
 
 
@@ -113,17 +114,13 @@ async def offer(request):
 
 
 
-clients = dict()
 
-dataset = dict()
 
 
 
 
 async def on_shutdown(app):
-    coros = [clients[_id].pc.close() for _id in clients]
-    await asyncio.gather(*coros)
-    clients.clear()
+    await client_manager.on_shutdown()
 
 
 if __name__ == "__main__":
@@ -157,4 +154,6 @@ if __name__ == "__main__":
     FaceGraph = FaceRecGraph();
     face_detect = MTCNNDetect(MTCNNGraph, scale_factor=2); #scale_factor, rescales image for faster detection
     face_recog = FaceFeature(FaceGraph)
+    dataset = dict()
+    client_manager = ClientManager(dataset, face_recog)
     web.run_app(app, port=args.port, ssl_context=ssl_context)

@@ -71,7 +71,7 @@ class ClientManager(object):
         self.dataset = dataset #global face features dataset
 
     def create_new_client(self, pc):
-        clients[self.id] = Client(pc, self.id)
+        self.clients[self.id] = Client(pc, self.id)
         self.id+=1;
         return self.id - 1;
 
@@ -94,8 +94,12 @@ class ClientManager(object):
         assert _id in self.clients
         return self.clients[_id]
 
+    async def on_shutdown(self):
+        coros = [self.clients[_id].pc.close() for _id in self.clients]
+        await asyncio.gather(*coros)
+        self.clients.clear()
 
-    async def close_client(self, _id):
+    async def remove_client(self, _id):
         assert _id in self.clients
         await self.clients[_id].close()
 
