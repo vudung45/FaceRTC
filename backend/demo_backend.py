@@ -2,10 +2,11 @@ import argparse
 import asyncio
 import json
 import logging
+import threading
 import os
 import platform
 import ssl
-
+import time
 from aiohttp import web
 
 from aiortc import RTCPeerConnection, RTCSessionDescription
@@ -56,6 +57,11 @@ async def sample_js(request):
     return web.Response(content_type="application/javascript", text=content)
 
 
+def recog_worker(client, data):
+    while data[0]:
+        client.generate_trackers_face_features()
+
+
 async def offer(request):
     params = await request.json()
     print(params);
@@ -63,6 +69,10 @@ async def offer(request):
 
     pc = RTCPeerConnection()
     client_id = client_manager.create_new_client(pc)
+   # data = [True]
+   #recog_worker_thread = threading.Thread(target=recog_worker,args=(client_manager.get_client(client_id),data,))
+    #recog_worker_thread.start()
+
 
     @pc.on("iceconnectionstatechange")
     async def on_iceconnectionstatechange():
@@ -88,6 +98,12 @@ async def offer(request):
                 channel.send("$recognize$") #ack back
 
 
+    @pc.on("close")
+    async def on_close(track):
+        print("Connection with client: "+str(client_id)+" closed")
+        #data[0] = False
+        #recog_worker_thread.join()
+        await client_manager.remove_client(client_id)
 
     @pc.on("track")
     def on_track(track):

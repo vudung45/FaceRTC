@@ -47,16 +47,24 @@ class FacialRecognitionTrack(VideoStreamTrack):
         while True:
             if(self.stream):
                 v_frame = await self.stream.recv();
-                self.client.purge_trackers();
+                self.client.purge_trackers(); #because we dont have a tracking algo so do this for now
                 image = v_frame.to_ndarray(format="bgr24");
                 try:
                 #parrellel this shit
                     rects, points = self.face_detector.detect_face(image)
                     for (i,rect) in enumerate(rects):
                         self.client.add_new_detections(rects);
-                        self.client.add_new_face(image[rect[1]:rect[3],rect[0]:rect[2]], rect)
+                        self.client.add_new_face(image[min(0,rect[1]):max(len(image),rect[3]),min(0,rect[0]):max(len(image),rect[2])], rect)
                 except Exception as e:
                     print(e)
+                for tracker in self.client.trackers.values():
+                    if tracker.active:
+                        cv2.rectangle(image,(tracker.bb[0],tracker.bb[1]),(tracker.bb[2],tracker.bb[3]),(255,0,0))
+                self.client.generate_trackers_face_features()
+                new_frame = av.VideoFrame.from_ndarray(image, format="bgr24")
+                new_frame.pts = v_frame.pts
+                new_frame.time_base = v_frame.time_base
+                v_frame = new_frame
                 self.frames.append(v_frame)
             else:
                 await asyncio.sleep(0.001)
@@ -71,14 +79,6 @@ class FacialRecognitionTrack(VideoStreamTrack):
         v_frame = None
         if len(self.frames) > 0:
             v_frame = self.frames.pop(0);
-            image = v_frame.to_ndarray(format="bgr24");
-            for tracker in self.client.trackers:
-                if tracker.active:
-                    cv2.rectangle(image,(tracker.bb[0],tracker.bb[1]),(tracker.bb[2],tracker.bb[3]),(255,0,0))
-            new_frame = av.VideoFrame.from_ndarray(image, format="bgr24")
-            new_frame.pts = v_frame.pts
-            new_frame.time_base = v_frame.time_base
-            v_frame = new_frame
         return v_frame
 
 
