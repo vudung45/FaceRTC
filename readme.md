@@ -22,11 +22,9 @@
   - ~~Performs Facial Recognition on detected faces~~
 
   - Optimization: 
-
-		+ Implement trackers for faces on frame to improve Facial Recognition Acurracy (recognize a face through series of frames, instead of one), and to reduce face detection & face recognition load (not having to detect/recog for every frame):
+  * Implement trackers for faces on frame to improve Facial Recognition Acurracy (recognize a face through series of frames, instead of one), and to reduce face detection & face recognition load (not having to detect/recog for every frame):
 	   		* ~~Setup a working framework but not yet implemented a Tracking algorithm~~
-		
-		+ Implement a more sophisticated `find_match` to find the best matching face_label for a given face feature (embeddings) in dataset.
+  * Implement a more sophisticated `find_match` to find the best matching face_label for a given face feature (embeddings) in dataset.
 
 
 ## Demo:
