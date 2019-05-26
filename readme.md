@@ -9,7 +9,7 @@
 
   WebRTC is a free, open-source project that provides web browsers and mobile applications with real-time communication via simple application programming interfaces.
 
-  I handle the communication from the client to the server by creating a Peer to Peer connection, by making both the server and the client behave as a node. The client would sending Webcam image data to the server via WebRTC. The server will then process the image (performs face detection and facial recognition), and send the result back to the client.
+  I handle the communication from the client to the server by creating a Peer to Peer connection, making both the server and the client behave as nodes. The client would sending Webcam image data to the server via WebRTC. The server will then process the image (performs face detection and facial recognition), and send the result back to the client.
 
 ## Todo list:
 
