@@ -31,8 +31,10 @@
 
 ## Demo:
 
-https://www.youtube.com/watch?v=oWQg18o9fic
+Demo on Phone Browser: https://www.youtube.com/watch?v=oWQg18o9fic
 
+
+![simple demo on desktop browser](https://media.giphy.com/media/Uu5Qb8p5iG9nfdtmqL/giphy.gif)
 
 
 Status: In-progress
