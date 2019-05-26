@@ -28,8 +28,16 @@
 
     * Implement a more sophisticated `find_match` to find the best matching face_label for a given face feature (embeddings) in dataset.
 
+    * Perform image processing on the frontend (Use canvas to draw an UI on top of `<video>`). This would reduce the bandwith load because the server will no longer have to send the entire `processed image` back to the client. [Should be easy but I'm not very good at html :D]. 
+
+        * Server only has to send locations&labels of faces in the frame. Client will then draw rectangle around those faces and put a label on top of them ( This is currently done in the backend)
+
 
 ## Demo:
+
+The server below is hosted on my macbook (Performance is not great but acceptable).
+
+The webclient is completely seperated from the facial recognition backend server, no computation is done on the frontend besides sending&receiving image data to the server.
 
 Demo on Phone Browser: https://www.youtube.com/watch?v=oWQg18o9fic
 
