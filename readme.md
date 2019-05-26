@@ -31,8 +31,8 @@
 
 ## Demo:
 
-[![Demo](https://img.youtube.com/vi/oWQg18o9fic/0.jpg)](https://www.youtube.com/watch?v=oWQg18o9fic)
 https://www.youtube.com/watch?v=oWQg18o9fic
+
 
 
 Status: In-progress
