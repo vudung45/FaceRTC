@@ -9,7 +9,7 @@
 
   WebRTC is a free, open-source project that provides web browsers and mobile applications with real-time communication via simple application programming interfaces.
 
-  I handle the communication from the client to the server by creating a Peer to Peer connection, making both the server and the client behave as nodes. The client would sending Webcam image data to the server via WebRTC. The server will then process the image (performs face detection and facial recognition), and send the result back to the client.
+  I handle the communication from the client to the server by creating a Peer to Peer connection, making both the server and the client to behave as nodes in the p2p connection. The client would be sending stream of Webcam images to the server via WebRTC. The server will then process those images (performs face detection and facial recognition), and send the results back to the client.
 
 ## Todo list:
 
@@ -28,9 +28,9 @@
 
     * Implement a more sophisticated `find_match` to find the best matching face_label for a given face feature (embeddings) in dataset.
 
-    * Perform image processing in frontend (Use canvas to draw an UI on top of `<video>`). This would reduce bandwith load because backend will no longer have to send the entire `processed image` back to client. [Should be easy but I'm not very good at html :D]. 
+    * Perform image processing in the frontend (Use canvas to draw an UI on top of `<video>`). This would reduce bandwith load because backend will no longer have to send the entire `processed image` back to the client. [Should be easy but I'm not very good at html :D]. 
 
-        * Server only has to send locations&labels of faces to client for each frame. Client will then draw rectangle around those faces and put labels on top of them (This is currently done in the backend)
+        * Server only has to send locations&labels of faces to client for each frame. Client will then draw rectangles around those faces and put labels on top of them (This is currently done in the backend, the `processed image` is then sent back to the client --- kinda expensive)
 
 
 ## Demo:
