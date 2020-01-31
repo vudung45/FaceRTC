@@ -9,7 +9,10 @@
 
   WebRTC is a free, open-source project that provides web browsers and mobile applications with real-time communication via simple application programming interfaces.
 
-  I handle the communication from the client to the server by creating a Peer to Peer connection, making both the server and the client to behave as nodes in the p2p connection. The client would be sending stream of Webcam images to the server via WebRTC. The server will then process those images (performs face detection and facial recognition), and send the results back to the client.
+# Implementation 
+ - Utilize WebRTC to establish a p2p connection between client web browser and server.
+ - Client sends stream of camera images to the backend service. Those images are later asynchronously processed.
+ - Detection&Recognition results are then sent back to the webbrowser for presentation accordingly.
 
 ## Todo list:
 
@@ -22,23 +25,19 @@
   - ~~Performs Facial Recognition on detected faces~~
 
   - Optimization: 
-    * Implement trackers for faces on frame to improve Facial Recognition Acurracy (recognize a face through series of frames, instead of one), and to reduce face detection & face recognition load (not having to detect/recog for every frame):
+    * Implement trackers for faces on frame to improve Facial Recognition Acurracy (recognize a face through series of frames, ignore motion blur, etc.):
 
   		* ~~Setup a working framework but not yet implemented a Tracking algorithm~~
 
     * Implement a more sophisticated `find_match` to find the best matching face_label for a given face feature (embeddings) in dataset.
-
-    * Perform image processing in the frontend (Use canvas to draw an UI on top of `<video>`). This would reduce bandwith load because backend will no longer have to send the entire `processed image` back to the client. [Should be easy but I'm not very good at html :D]. 
-
-        * Server only has to send locations&labels of faces to client for each frame. Client will then draw rectangles around those faces and put labels on top of them (This is currently done in the backend, the `processed image` is then sent back to the client --- kinda expensive)
-
+		* Kd-tree search ( currently simple linear search )
+    * Perform image processing at the frontend (Use canvas to draw an UI on top of `<video>`). This would significantly reduce bandwith load, because we currently are sending the entire processed frame back to the browser. [Should be easy but I'm not very good at html :D]. 
 
 ## Demo:
 
 The server below is hosted on my macbook (Performance is not great but acceptable).
 
-The webclient is completely seperated from the facial recognition backend server, no computation is done in the frontend besides sending/receiving image data to/from the server.
-
+The webclient could be ran on a seperate machine, no computation is heavy computation is done via the web client.
 Demo on Phone Browser: https://www.youtube.com/watch?v=oWQg18o9fic
 
 
