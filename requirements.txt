@@ -5,4 +5,4 @@ aiohttp==3.5.4
 av==6.2.0
 aiortc==0.9.21
 numpy==1.16.3
-Pillow==6.0.0
+Pillow==8.1.1
