@@ -1,4 +1,4 @@
-opencv_contrib_python==3.4.1.15
+opencv_contrib_python==4.2.0.32
 six==1.10.0
 tensorflow==1.13.1
 aiohttp==3.5.4
