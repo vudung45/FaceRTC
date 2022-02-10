@@ -1,6 +1,6 @@
 opencv_contrib_python==3.4.1.15
 six==1.10.0
-tensorflow==1.13.1
+tensorflow==2.5.3
 aiohttp==3.5.4
 av==6.2.0
 aiortc==0.9.21
